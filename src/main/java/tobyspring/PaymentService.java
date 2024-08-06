@@ -33,7 +33,6 @@ public class PaymentService {
         return new Payment(orderId,currency,foreignCurrencyAmount,exrate,convertedAmount, validUntil);
     }
 
-
     public static void main(String[] args) throws IOException {
         PaymentService paymentService = new PaymentService();
         Payment payment = paymentService.prepare(100L,"USD",BigDecimal.valueOf(50.7));
