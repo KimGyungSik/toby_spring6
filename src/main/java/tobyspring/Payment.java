@@ -1,4 +1,4 @@
-package tobyspring.toby_spring6;
+package tobyspring;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

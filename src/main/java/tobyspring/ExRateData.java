@@ -1,4 +1,4 @@
-package tobyspring.toby_spring6;
+package tobyspring;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
