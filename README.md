@@ -8,7 +8,7 @@
     * 클래스는 설계도, 즉 설계도를 통해 오브젝트를 생성
     * 자바에서는 배열(Array)도 오브젝트 
   * ### 의존관계 ?
-    * ![img.png](img.png)
+    * ![img.png](src/main/resources/image/img.png)
     * Client의 기능이 제대로 동작하려면 Supplier가 필요
     * Client가 Supplier를 사용,호출,생성,인스턴스화,전송
     * 클래스 레벨(코드 레벨)의 의존관계 
@@ -18,29 +18,29 @@
 
 * ## 관심사의 분리 (Separation of Concerns)
   * ### 1. 변경의 이유, 시점에 따른 분리 -> 메서드 추출
-    * ![img_1.png](img_1.png)
+    * ![img_1.png](src/main/resources/image/img_1.png)
   * ### 2. 클래스가 두가지의 관심사를 가지고 있다면 분리 -> 상속을 통한 확장(템플릿 메서드 패턴)
-    * ![img_2.png](img_2.png)
+    * ![img_2.png](src/main/resources/image/img_2.png)
     * 상속의 단점 : 상하위 클래스의 관계가 매우 밀접, 상위 클래스의 변경에 따라 하위 클래스를 모두 변경해야함
   * ### 3. 관심사에 따른 클래스의 분리 -> 포함(Composite) 관계
-    * ![img_3.png](img_3.png)
+    * ![img_3.png](src/main/resources/image/img_3.png)
     * 클래스 레벨에 사용 의존관계가 만들어지기 떄문에 강한 코드 수준의 결합이 생김 -> 실제로 사용할 클래스가 변경되면 이용하는 쪽의 코드도 변경되어야 함
     * 상속한 것이 아니기 때문에 사용하는 클래스의 메서드 이름과 구조도 제각각일 수도 있음
   * ### 4. 인터페이스 도입
-    * ![img_4.png](img_4.png) 
+    * ![img_4.png](src/main/resources/image/img_4.png) 
     * WebApiExRateProver 코드 수정시 PaymentService도 일부분 수정해야함 -> 클래스의 인스턴스를 만드는 생성자를 호출하는 코드에는 클래스 이름이 등장하기 때문
     * 런타임 시점의 관계
-      * ![img_5.png](img_5.png)
+      * ![img_5.png](src/main/resources/image/img_5.png)
   * ### 5. 관계설정 책임의 분리
-    * ![img_6.png](img_6.png)
+    * ![img_6.png](src/main/resources/image/img_6.png)
       * 자신이 어떤 클래스의 오브젝트를 사용할지를 결정 -> 관계설정 책임을 직접 가지고 있는것
       * 코드레벨에서의 의존관계 != 런타임 시점의 의존관계 -> 둘이 다를 수 있음
       * 런타임 시점의 사용해야 할 오브젝트를 설정하는 책임이 어디있는가? -> 이부분에 따라서 코드레벨의 의존관계도 달라짐
       * 의존관계를 설정하는 코드를 분리
-        * ![img_7.png](img_7.png)
+        * ![img_7.png](src/main/resources/image/img_7.png)
           * 관계설정 책임을 자신을 호출하는 앞의 오브젝트(Client)에게 넘긴 것
           * Client는 생성자를 통해 어떤 클래스의 오브젝트를 사용할지 결정한 것을 전달해주면 됨
-      * ![img_8.png](img_8.png)
+      * ![img_8.png](src/main/resources/image/img_8.png)
         * 여기서 Client도 2가지 관심사를 가지고 있음 
         * 런타임 시점의 오브젝트 사이의 의존관계를 설정하는 책임을 ObjectFactory에게 넘김 -> 사용과 생성을 대한 관심사를 분리
   
@@ -58,9 +58,9 @@
     * PaymentService -> Client 권한(결정권)이 다른 곳으로 이전
 
 * ## 스프링 컨테이너와 의존관계 주입(Dependency Injection)
-  * ![img_9.png](img_9.png)
-  * ![img_10.png](img_10.png)
-  * ![img_11.png](img_11.png)
+  * ![img_9.png](src/main/resources/image/img_9.png)
+  * ![img_10.png](src/main/resources/image/img_10.png)
+  * ![img_11.png](src/main/resources/image/img_11.png)
       * BeanFactory는 ObjectFactory의 구성 정보를 참고해서 동작하게 만듬 
       * 스프링 IoC/DI 컨테이너 : Bean들을 필요할 떄 제공/관리
       * IoC : 어떤 오브젝트를 사용할 것인지에 대한 제어권(결정권)의 이전
@@ -79,14 +79,14 @@
 
 
 * ## DI와 디자인 패턴
-  * ![img_12.png](img_12.png)
+  * ![img_12.png](src/main/resources/image/img_12.png)
     * 디자인 패턴을 구분하는 두 가지 방식 : 사용 목적(purpose), 스코프(scope)
       * 클래스 패턴 : 상속을 이용한 확장성을 가진 패턴
       * 오브젝트 패턴 : 합성(composition)을 이용한 패턴 -> DI(의존성 주입)이 사용됨
-      * ![img_13.png](img_13.png)
+      * ![img_13.png](src/main/resources/image/img_13.png)
   * ### WebApiExRateProvider에 캐시 기능 추가? -> 데코레이터 패턴 (껍데기가 알맹이 행새, 상속과 포함을 동시에)
-    * ![img_14.png](img_14.png)
-    * ![img_15.png](img_15.png)
+    * ![img_14.png](src/main/resources/image/img_14.png)
+    * ![img_15.png](src/main/resources/image/img_15.png)
       * 데코레이터 패턴 -> 오브젝트에 부가적인 기능/책임을 동적으로 부여
     
 
@@ -96,10 +96,10 @@
 
       * 모듈 -> 자바에서는 패키지로 모듈을 구분 
       * 둘 모두 추상화에 의존 -> 먼저 인터페이스를 통해서 추상화에 의존하도록 코드를 만들어야 함
-    * ![img_17.png](img_17.png)
+    * ![img_17.png](src/main/resources/image/img_17.png)
       * 문제점 : 모듈 전체를 보면 아직 상위 모듈이 하위 모듈에 의존하고 있음 -> DIP 위배
       * 해결 : 인터페이스 소유권의 역전이 필요 (Separate Interface 패턴)
-    * ![img_18.png](img_18.png) 
+    * ![img_18.png](src/main/resources/image/img_18.png) 
     * 인터페이스가 어떤 패키지에 들어가 있어야 하는가? -> 인터페이스는 이를 구현한 클래스와 같은 패키지가 아닌 이 인터페이스를 사용하는 쪽에 있는 것이 자연스러움
     * 하위 모듈 자체를 갈아끼울 수 있음! -> 하위 모듈이 어떤 일을 하든 상위 모듈은 영향을 받지 않음, 상위 모듈의 변경은 반대로 영향을 줌
   * ### 2. 추상화는 구체적인 사항에 의존해서는 안 된다. 구체적인 사항은 추상화에 의존해야 한다.
