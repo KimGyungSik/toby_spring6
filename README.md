@@ -92,7 +92,7 @@
 
 * ## 의존성 역전 원칙(Dependency Inversion Principle, DI != DIP)
   * ### 1. 상위 수준의 모듈은 하위 수준의 모듈에 의존해서는 안 된다. 둘 모두 추상화에 의존해야 한다.
-    * <img src="" width="500">
+    * <img src="https://github.com/user-attachments/assets/f0500246-7624-4c01-aeda-04e7edb295dc" width="500">
 
       * 모듈 -> 자바에서는 패키지로 모듈을 구분 
       * 둘 모두 추상화에 의존 -> 먼저 인터페이스를 통해서 추상화에 의존하도록 코드를 만들어야 함
