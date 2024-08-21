@@ -1,6 +1,8 @@
 package tobyspring.payment;
 
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.Clock;
 import java.time.LocalDateTime;
 
 public class Payment {
@@ -20,6 +22,23 @@ public class Payment {
         this.exRate = exRate;
         this.convertedAmount = convertedAmount;
         this.validUntil = validUntil;
+    }
+
+    public static Payment createPrepared(Long orderId, String currency, BigDecimal foreignCurrencyAmount, ExRateProvider exRateProvider,Clock clock) throws IOException {
+        // exProvider를 받아온다
+        // exProvider의 getExRate메서드를 호출해 exRate값을 받아온다
+        // clock을 받아온다
+        // clock을 이용해 validUntil을 구한다
+        ExRateProvider provider = exRateProvider;
+        BigDecimal exRate = provider.getExRate(currency);
+        BigDecimal convertedAmount = foreignCurrencyAmount.multiply(exRate);
+        LocalDateTime validUntil = LocalDateTime.now(clock).plusMinutes(30);
+
+        return new Payment(orderId, currency, foreignCurrencyAmount, exRate, convertedAmount, validUntil);
+    }
+
+    public boolean isValid(Clock clock) {
+        return LocalDateTime.now(clock).isBefore(this.validUntil);
     }
 
     public Long getOrderId() {

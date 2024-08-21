@@ -27,5 +27,4 @@ public class CachedExRateProvider implements ExRateProvider {
 
         return cachedExRate;
     }
-
 }
