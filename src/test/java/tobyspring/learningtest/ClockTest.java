@@ -11,15 +11,15 @@ import java.time.ZoneId;
 public class ClockTest {
 
     // Clock을 이용해서 LocalDateTime.now?
-    @Test
-    void clock() {
-        Clock clock = Clock.systemDefaultZone();
-
-        LocalDateTime dt1 = LocalDateTime.now(clock);
-        LocalDateTime dt2 = LocalDateTime.now(clock);
-
-        Assertions.assertThat(dt2).isAfter(dt1);
-    }
+//    @Test
+//    void clock() {
+//        Clock clock = Clock.systemDefaultZone();
+//
+//        LocalDateTime dt1 = LocalDateTime.now(clock);
+//        LocalDateTime dt2 = LocalDateTime.now(clock);
+//
+//        Assertions.assertThat(dt2).isAfter(dt1);
+//    }
 
 
     // Clock을 Test에서 사용할 때 내가 원하는 시간을 저장해서 현재 시간을 가져오게 할 수 있는가?

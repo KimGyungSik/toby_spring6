@@ -24,7 +24,7 @@ public class Payment {
         this.validUntil = validUntil;
     }
 
-    public static Payment createPrepared(Long orderId, String currency, BigDecimal foreignCurrencyAmount, ExRateProvider exRateProvider,Clock clock) throws IOException {
+    public static Payment createPrepared(Long orderId, String currency, BigDecimal foreignCurrencyAmount, ExRateProvider exRateProvider,Clock clock)  {
         // exProvider를 받아온다
         // exProvider의 getExRate메서드를 호출해 exRate값을 받아온다
         // clock을 받아온다

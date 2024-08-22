@@ -37,7 +37,7 @@ class PaymentServiceSpringTest {
 
     @Test
     @DisplayName("prepare 메소드가 요구사항 3가지를 잘 충족했는지 검증")
-    void convertedAmount() throws IOException {
+    void convertedAmount()  {
 //        BeanFactory beanFactory = new AnnotationConfigApplicationContext(TestPaymentConfig.class);
 //        PaymentService paymentService = beanFactory.getBean(PaymentService.class);
 
@@ -60,7 +60,7 @@ class PaymentServiceSpringTest {
     }
 
     @Test
-    void validUntil() throws IOException {
+    void validUntil()  {
         Payment payment = paymentService.prepare(1L, "USD", TEN);
 
         // valid until이 prepare() 30분 뒤로 설정됐는가?

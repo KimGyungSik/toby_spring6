@@ -3,6 +3,9 @@ package tobyspring;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import tobyspring.api.ApiTemplate;
+import tobyspring.api.ErApiExRateExtractor;
+import tobyspring.api.SimpleApiExecutor;
 import tobyspring.exrate.WebApiExRateProvider;
 import tobyspring.payment.ExRateProvider;
 import tobyspring.payment.PaymentService;
@@ -23,12 +26,17 @@ public class PaymentConfig {
 //    }
 
     @Bean
+    public ApiTemplate apiTemplate() {
+        return new ApiTemplate(new SimpleApiExecutor(),new ErApiExRateExtractor());
+    }
+
+    @Bean
     public Clock clock() {
         return Clock.systemDefaultZone();
     }
 
     @Bean
     public ExRateProvider exRateProvider() {
-        return new WebApiExRateProvider();
+        return new WebApiExRateProvider(apiTemplate());
     }
 }

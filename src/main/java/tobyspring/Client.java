@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 @Component
 public class Client {
 
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) {
 //        PaymentConfig objectFactory = new PaymentConfig();
 //        PaymentService paymentService = objectFactory.paymentService();
         BeanFactory beanFactory = new AnnotationConfigApplicationContext(PaymentConfig.class);
