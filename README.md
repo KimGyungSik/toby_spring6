@@ -294,11 +294,12 @@
       * 전략(콜백) 2가지 -> 변경 가능할 수 있게 만들어짐
         * 1 . HTTP Client 라이브러리 확장 : ClientHttpRequestFactory
           * RestTemplate이 API 호출에 사용되어지는 기술 변경 시 -> ClientHttpRequestFactory라는 인터페이스로 만들어진 전략(콜백)을 변경 
-          * ![img.png](img.png)
+          * ![img.png](src/main/resources/image3/img.png)
             * SimpleClientHttpRequest -> 기본 전략(콜백)
-          * ![img_1.png](img_1.png)
+          * ![img_1.png](src/main/resources/image3/img_1.png)
             * 콜백이기 때문에 메서드가 1개
-          * ![img_2.png](img_2.png)
+          * ![img_2.png](src/main/resources/image3/img_2.png)
+            * request 변수에 ClientHttpRequestFactory의 구현체가 담김
         * 2 . Message Body를 변환하는 전략 : HttpMessageConverter
 
     * ClientHttpRequestFactory : HTTP Client 기술을 사용해서 ClientHttpRequest를 생성하는 전략(콜백)
