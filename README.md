@@ -1,7 +1,7 @@
 # toby_spring6
 토비 스프링 6 study
 
-* ## 오브젝트와 의존관계
+* ## section 2. 오브젝트와 의존관계
   * ### 오브젝트 ? 
     * 클래스의 인스턴스 = 오브젝트
     * 클래스는 오브젝트를 만들기 위한것
@@ -106,7 +106,7 @@
   
 -----
 
-* ## 테스트
+* ## section 3. 테스트
   * ### 수동 테스트의 한계
     * 프린트된 메시지를 수동으로 확인하는 방법은 불편하다.
     * 사용자 웹 UI까지 개발한 뒤에 확인하는 방법은 테스트가 실패했을 때 확인할 코드가 많다
@@ -121,9 +121,9 @@
   * ### 3. 환율 유효 시간 계산은 정확한 것인가? -> 학습 테스트
 
 * ## 테스트 구성요소
-  * ![img.png](img.png)
-  * ![img_1.png](img_1.png)
-  * ![img_2.png](img_2.png)
+  * ![img.png](src/main/resources/image2/img.png)
+  * ![img_1.png](src/main/resources/image2/img_1.png)
+  * ![img_2.png](src/main/resources/image2/img_2.png)
     * 테스트 대상 : PaymentService
     * 협력자 : WebApiExRateProvider
     * 테스트용 오브젝트(Test Double) : ExRateProviderStub -> 테스트를 수행하는 동안만 사용하는 오브젝트
@@ -141,7 +141,7 @@
 * ## 학습 테스트
   * ### 직접 만들지 않은 코드, 라이브러리, 레거시 시스템에 대한 테스트
   * ### 테스트 대상의 사용방법을 익히고 동작방식을 확인하는데 유용, 외부 기술, 서비스가 버전이 올라갔을 때 이전과 동일하게 동작하는지 확인가능
-  * ![img_3.png](img_3.png)
+  * ![img_3.png](src/main/resources/image2/img_3.png)
     * Fixed Clock : 시간을 정해둔 것, 우리가 만든 것이 아닌 자바 라이브러리안에 있는 것
     * PaymentService가 이용하는 의존 오브젝트로 동작할려면 빈으로 등록되어야함 -> @Configuration에 빈으로 등록되어야 함
     
@@ -180,11 +180,140 @@
     * 즉, <strong> @Configuration이 있으면, 모든 @Bean 메서드는 스프링 컨테이너에서 관리 </strong>
 
   * ### DTO vs Entity(Domain) ?
-    * ![img_4.png](img_4.png)
-    * ![img_5.png](img_5.png)
+    * ![img_4.png](src/main/resources/image2/img_4.png)
+    * ![img_5.png](src/main/resources/image2/img_5.png)
       * Client <- dto -> controller(web) - service - repository(dao) <- domain(entity) -> DB
       * DTO :  각 계층 간을 이동할 때 데이터를 '전달'해주는 클래스
       * Domain : 소프트웨어로 해결하고자 하는 문제 영역
       * Domain Model Object :  도메인 모델 객체는 해당 도메인의 비즈니스 로직이나 요구사항을 포함
       * Entity : 엔티티(entity)는 DB의 테이블이나 도큐먼트를 표현하는 객체
-   
+  
+---
+
+* ## section 5. 템플릿
+  * ### 개방 폐쇄 원칙 (OCP)
+    * 클래스나 모듈은 확장에는 열려 있어야 하고 변경에는 닫혀 있어야 한다
+      * 어떤 코드는 변경을 통해서 그 기능이 다양해지고, 확장하려는 성질이 있음
+      * 또 어떤 부분은 고정되어 있고, 변하지 않으려는 성질을 가지고 있음
+      * => 이 둘이 섞여서 나오는데 변경의 시점/이유를 통해 분리해야함
+    * ![img_6.png](src/main/resources/image2/img_6.png)
+      * 해당 구조가 OCP 원칙을 잘 지키고 있음
+      * DI를 통한 의존 오브젝트를 주입 받아 작동을 함
+
+  * ### 템플릿 
+    * ![img_7.png](src/main/resources/image2/img_7.png)
+      * => OCP를 잘 지키기 위해서 (템플릿 콜백 패턴)
+
+  * ### WebApiExRateProvider Refactoring
+    * Refactoring(리펙터링) : 기능을 추가, 수정 X, 구조만 개선 -> 변경에 유리한 코드로
+    * 리펙터링의 핵심은 기능이 변경되지 않고, 구조를 개선하여 자동화된 테스트를 통해 검증하는 것
+    * ![img_8.png](src/main/resources/image2/img_8.png)
+      * IOException 어쩔거임?
+        * 이를 구현한 SimpleExRateProvider는 getExRate메서드에서 예외를 안던짐 -> 즉 IOException을 무조건 던지는건 아니라고 봄
+      * Catch 하는 이유?
+        * 가장 큰 이유 -> 복구하기 위해
+        * 만약, 복구 할만한 설계가 없다면 그냥 무시하도록 하면됨
+      * 결론 : checked Exception이 아닌 RuntimeException으로 변경해서 던지면 예외를 던지지 않아도 됨
+        * RuntimeException은 throws를 선언하지 않아도 제일 앞단(tomcat)까지 던져짐 
+      * ![img_9.png](src/main/resources/image2/img_9.png)
+        * try-with-resource를 이용한 리소스 반환(AutoCloseable)
+        * BufferReader는 AutoCloseable 인터페이스의 구현체이기 때문에 try()문에 넣으면 자동으로 resource를 반환함
+        
+
+  * ### 변하는 코드 분리하기 (메서드 추출)
+    * WebApiExRateProvider의 구성
+      * 1 . URI를 준비하고 예외처리를 위한 작업을 하는 코드 -> API로부터 환율 정보를 가져오는 코드의 기본 틀 (변경되지 않으려고 하는 성질)
+      * 2 . API를 실행하고 서버로부터 받은 응답을 가져오는 코드 -> API를 호출하는 기술과 방법이 변경될 수 있음 (변경하려는 성질)
+      * 3 . JSON 문자열을 파싱하고 필요한 환율정보를 추출하는 코드 -> API응답의 JSON 구조에 따라 정보를 추출하는 방식이 변경 (변경하려는 성질)
+    * 확장이 필요할 수 있는 부분을 메서드로 추출
+      * 2번과 3번 -> 변경되고 확장하려는 성질
+        * ![img_10.png](src/main/resources/image2/img_10.png)
+      * 1번과 try-catch문들 -> 잘 바뀌지 않으려는 성질
+        * ![img_11.png](src/main/resources/image2/img_11.png)
+      
+
+  * ### 변하지 않는 코드 분리하기 (메서드 추출 - 템플릿의 탄생)
+    * 템플릿(Template) : 어떤 목적을 위해 미리 만들어둔 모양이 있는 틀
+      * 고정된 틀 안에 바꿀 수 있는 부분을 넣어서 사용하도록 만들어진 오브젝트 -> 고정된 작업 흐름 안에 변경할 수 있는 코드를 콜백 형태로 전달해서 사용할 수 있도록 만들어진 오브젝트
+      * 고정된 틀을 만들어 놓는 이유 ? -> 재사용 하기 위해서
+    * 템플릿 메서드 패턴의 템플릿 != 템플릿 
+      * 템플릿 메서드 패턴 : 고정된 틀의 로직을 가진 템플릿 메소드를 슈퍼클래스에 두고, 바뀌는 부분을 서브클래스의 메소드에 두는 구조
+    * 메서드 추출 -> 보기 좋음 but 확장성이 떨어짐 -> 인터페이스 도입과 클래스 분리 
+
+  * ### ApiExecutor 분리 (인터페이스 도입과 클래스 분리)
+    * ![img_12.png](src/main/resources/image2/img_12.png)
+      * 템플릿을 사용하는 장점을 누릴 수 없음 -> 콜백을 통해 메서드 주입 
+
+  * ### ApiExecutor 콜백과 메서드 주입 (Callback + Method Injection)
+    * 콜백 :  실행되는 것을 목적으로 다른 오브젝트(템플릿)의 메소드에 전달되는 오브젝트 -> 하나의 메서드를 가진 인터페이스 타입의 오브젝트 또는 람다 오브젝트
+      * 파라미터로 전달되지만 값을 참조하기 위한 것이 아니라 특정 로직을 담은 메소드를 실행 시키는 것이 목적
+    * 템플릿/콜백은 전략 패턴의 특별한 케이스
+      * 템플릿 -> 전략 패턴의 컨텍스트 (변하지 않는 틀)
+      * 콜백 -> 전략 패턴의 전략 
+      * 특별한 케이스 ? -> 메서드 하나만 가진 전략 인터페이스를 사용하는 전략패턴임 
+      * 변하는 속성들을 가진 코드는 콜백 형태로 만들어서 템플릿의 메서드 파라미터로 전달
+    * 메서드 주입 (메서드 호출 주입, DI의 한 종류)
+      * 컨테이너의 구성 정보에 포함되지 않고(Bean으로 등록X) 메서드 실행 시점에 의존 오브젝트를 파라미터로 주입하는 방식
+      * 콜백은 템플릿에 메서드 주입 방식으로 전달됨 
+        * 템플릿은 메서드의 파라미터에 인터페이스 타입의 매개변수를 선언해둠
+        * why? -> 템플릿은 무엇을 주입하는지 몰라야 하기 때문 (변하지 않는 틀)
+    * 콜백 간단히 만드는 법
+      * 클래스의 정의 + 클래스 오브젝트를 생성하는 것 => 익명 클래스 (lamda)
+    * ![img_13.png](src/main/resources/image2/img_13.png)
+      * 템플릿의 메서드를 호출해주는 부분을 클라이언트로 이전 -> IoC(제어의 역전)
+      * 클라이언트가 콜백을 생성해서 파라미터로 넘겨 템플릿의 메서드를 호출 
+  
+  * ### ExRateExtractor 콜백 (Callback + Method Injection)
+    * 람다식을 만들어서 콜백을 던지면 클래스 만들지 않아도 됨 why? 딱 한번만 사용디ㅗ고 말 것이기 때문에
+    * 람다식 -> 파라미터&리턴값만 알면 됨
+
+  * ### ApiTemplate 분리 (환율정보 API의 기본 틀)
+    * 환율정보 API로부터 환율을 가져오는 기능을 제공하는 오브젝트
+    * API 호출과 정보 추출의 기본 틀 제공
+    * 두 가지 콜백을 이용
+    * 유사한 여러 오브젝트에서 재사용 가능 
+    
+  * ### 디폴트 콜백과 템플릿 빈 (재사용 가능한 Template Bean)
+    * ![img_14.png](src/main/resources/image2/img_14.png)
+      * 디폴트 콜백 : 주입 받을 콜백을 필드로 선언해 템플릿 생성 시 주입 받아 템플릿 메서드로 전달하는 것
+      * 템플릿을 공유 가능한 오브젝트로 사용할 것인지 ? 
+        * 오브젝트를 만드는 결정권을 가진 Spring Container(스프링 구성정보 + 빈)안에 싱글톤 빈으로 등록 
+      * 싱글톤 빈으로 만들기 위한 조건
+        * 한번 만들어 놓고 여러 쓰레드에서 접근할 것이기 때문에 주의해야함
+        * -> 그 오브젝트가 상태값(iv)를 가지고 있는 경우 
+        * 즉, 업데이트 되거나 등록되는 정보(iv)를 가지고 있다면 싱글톤으로 생성 못함
+      * 템플릿 클래스 생성 시 
+        * 그림 1 -> 디폴트 콜백을 설정할 수 있는 기본 생성자 
+        * 그림 2 -> Spring 구성정보를 통해서 디폴트 콜백 코드를 건드리지 않고, 생성자를 통해 변경할 수 있도록 하는 코드
+
+
+  * ### 스프링이 제공하는 템플릿
+    * RestTemplate : HTTP API 요청을 처리하는 템플릿
+      * 템플릿 -> 변하지 않는 흐름(flow)
+      * 전략(콜백) 2가지 -> 변경 가능할 수 있게 만들어짐
+        * 1 . HTTP Client 라이브러리 확장 : ClientHttpRequestFactory
+          * RestTemplate이 API 호출에 사용되어지는 기술 변경 시 -> ClientHttpRequestFactory라는 인터페이스로 만들어진 전략(콜백)을 변경 
+          * ![img.png](img.png)
+            * SimpleClientHttpRequest -> 기본 전략(콜백)
+          * ![img_1.png](img_1.png)
+            * 콜백이기 때문에 메서드가 1개
+          * ![img_2.png](img_2.png)
+        * 2 . Message Body를 변환하는 전략 : HttpMessageConverter
+
+    * ClientHttpRequestFactory : HTTP Client 기술을 사용해서 ClientHttpRequest를 생성하는 전략(콜백)
+      * SimpleClientHttpRequest (HttpURLConnection)
+      * JdkClientHttpRequest (HttpClient) 
+
+    * doExecute() : RestTemplate에서 쓰이는 핵심 템플릿 메서드(핵심 workflow), 2개의 인터페이스 타입의 콜백을 받음
+      * 1 . RequestCallback -> void doWithRequest(ClientHttpRequest request) throws IOException;
+      * 2 . ResponseExtractor -> T extractData(ClientHttpResponse rsponse) throws IOException;
+      * execute(), getForObject(), postForEntity(), .. 등등의 편리한 메서드 제공 -> 디폴트 콜백을 위한 메서드
+    
+    * 스프링의 Template
+      * JdbcTemplate, JmsTemplate, TransactionTemplate, HibernateTemplate, SqlSessionTemplate....
+
+----
+
+
+* ## section 6. 예외
+  * 
