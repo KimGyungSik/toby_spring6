@@ -318,4 +318,100 @@
 
 
 * ## section 6. 예외
-  * 
+  * ### 예외 ? : 정상적인 프로그램 흐름을 방해하는 사건
+    * 예외적인 상황에서만 사용
+    * 많은 경우 예외는 프로그램 오류, 버그 때문에 발생
+
+  * ### 예외가 발생하면 ?
+    * 예외 상황을 복구해서 정상적인 흐름으로 전환할 수 있는가 ?
+      * 1 . 재시도
+      * 2 . 대안 -> ex) 환율정보를 가져오는 서비스를 하나 더 만든다던가.. 캐시정보를 통해..
+      
+    * 버그인가 ? -> ex) NullPointException 복구 못함 why? 버그이기 때문에
+      * 1 . 예외가 발생한 코드의 버그인가 ? -> 복구하기 쉬움, null체그가 안되어 있다면 null체크하게끔
+      * 2 . 클라이언트의 버그인가 ? -> 적절한 통보 날리기 (친절한 메세지)
+    
+    * 제어할 수 없는 예외상황인가 ?
+      * 안내, 개발자&관리자에게 통보
+
+
+  * ### 예외를 잘못 다루는 코드
+    * 예외가 예외답게 처리 될려면 ?
+      * 1 . 복구하던가
+      * 2 . 예외를 다시 밖으로 던지던가
+    * 예외를 무시하는 코드, print로 로그만 찍는 코드 (예외를 다시 던져야함)
+      * ![img.png](src/main/resources/image4/img.png)
+    * 무의미하고 무책임한 throws
+      * ![img_1.png](src/main/resources/image4/img_1.png)
+    
+  * ### 예외의 종류
+    * Error -> OutOfMemoryError, ThreadDeath
+      * 시스템에 비정상적인 상황이 발생했을 때 사용되고 주로 JVM에서 발생시킴
+      * 일반적으로 애플리케이션에서 복구를 기대할 수 없는 종류의 예외의 슈퍼 클래스
+    * 체크 예외(Exception)
+      * 애플리케이션이 복구를 기대할 수도 있는 모든 예외의 슈퍼 클래스
+      * catch나 throws를 강요
+      * 복구할 수 없다면 RuntimeException이나 적절한 추상화 레벨의 예외로 전환해서 던질 것 -> 복구할 수 있는 문제라면 복구해야함
+    * 언체크 예외(RuntimeException)
+      * 명시적인 예외처리가 강제되지 않음
+      * catch나 throws를 쓰지 않아도 문제 없이 컴파일됨
+      
+  * ### 예외의 추상화와 전환
+    * 사용 기술에따라 같은 문제에 대해 다른 종류의 예외 발생
+    * 적절한 예외 추상화와 예외 변역이 필요
+    * 스프링에서의 주요 예외처리 
+      * 1 . RuntimeException의 사용
+      * 2 . 예외의 추상화와 전환
+  
+  * ### JPA를 이용한 Order 저장
+    * ![img_3.png](src/main/resources/image4/img_3.png)
+      * 파란색 박스 -> 매번 새로운 객체 생성 (빈 등록X)
+      * 검정색 박스 -> 객체 생성 1번 (싱글톤으로 스프링 컨테이너에 빈 등록)
+      * EntityManager -> 오브젝트를 DB가 이해할 수 있는 언어로 변환 또는 DB에서 온 정보를 다시 오브젝트로 변환할 떄 필요
+      * DataSource, EntityManagerFactory -> JPA가 잘 동작하기 위해 필요한 오브젝트
+
+  * ### Order 리포지토리와 예외
+    * ConstraintViolationException 발생 -> 복구하는 작업을 해야하는데, 어떻게 처리할거임 ?
+      * 다른 종류의 JPA를 지원하는 라이브러리를 사용한다고 했을 때, 예외클래스의 타입이 달라질 수 있음
+      * JDBC, MyBatis 같은 데이터를 다루는 기술 사용 시 <strong> 동일한 상황에서 다른 예외가 생길 수 있다는 것</strong>이 문제임
+    * 그래서 무슨 예외를 잡아야 함 ?
+      * 똑같은 종류의 문제를 처리하는 코드가 항상 일정한 방식으로 예외를 다룰 수 있도록 해줘야함
+      * 여기서 필요한 것이 예외 추상화와 변환임
+
+  * ### DataAccessException과 예외 추상화
+    * 고객한테 어떤 알림을 주기 위해서 필요로 하는 다른 예외, 이커머스만의 예외로 변환해줘야함
+    * 어떤 저장기술의 종류와 방법에 영향을 받지 않고, 일관된 방법으로 예외를 처리하는 코드를 만들고 싶으면 -> 스프링 데이터 엑세스 예외처리 ㄱㄱ
+    * JDBC SQLException
+      * JDBC를 기반으로 하는 모든 기술에서 발생하는 예외
+      * JDBC, MyBatis, JPA,...
+      * DB의 에러코드에 의존하거나, 데이터 기술에 의존적인 예외처리 코드
+      * 세분화가 되어 있지 않음 그래서 DB와 관련된 예외처리를 추상화시킴 -> DataAccessException
+    * DataAccessException
+      * ![img_5.png](src/main/resources/image4/img_5.png)
+      * ![img_4.png](src/main/resources/image4/img_4.png)
+        * DB의 에러코드와 데이터 엑세스 기술에 독립적인 예외 구조
+        * 적절한 예외 번역(exception translation) 도구를 제공
+      * DataIntegrityViolationException 
+        * 에러코드, 어떤 기술이든 상관없이 항상 이 예외가 던져지도록 함
+        * 이 예외가 catch하면 됨, 기술 변경해도 상관 X
+      * 스프링이 제공하는 DB에러코드의 매핑정보
+        * ![img_6.png](src/main/resources/image4/img_6.png)
+
+* ## 추가적으로 공부해본 스프링의 예외 처리
+  * ### 스프링 예외 처리에 대한 흚
+    * ![img_7.png](src/main/resources/image4/img_7.png)
+    * ![img_8.png](src/main/resources/image4/img_8.png)
+      * 1 ~ 6 : ExceptionHandlerExceptionResolver 가 동작
+      * 7 ~ 9 : ResponseStatusExceptionResolver 가 동작
+      * 10 ~ 12 : DefaultHandlerExceptionResolver가 동작
+      * 12 : 적합한 ExceptionResolver 가 없음
+  * ### 체크 예외의 문제점 -> 무조건 잡거나, 잡지 못하면 throw를 선언해 던져야만 함
+    * ![img_2.png](src/main/resources/image4/img_2.png)
+  * ### jdbcTemplate(JDBC 반복문제 해결) -> 템플릿/콜백 패턴이 쓰임 / 예외 발생 시 스프링 예외 변환기도 자동 실행해줌
+  
+  * 참고할 만한 블로그 
+    * https://velog.io/@semi-cloud/Spring-DB-%EC%8A%A4%ED%94%84%EB%A7%81-%EC%98%88%EC%99%B8-%EC%B6%94%EC%83%81%ED%99%94
+    * https://hsb422.tistory.com/entry/%E3%85%81%EB%AC%B8%EB%B2%95-%EC%8A%A4%ED%94%84%EB%A7%81-%EC%98%88%EC%99%B8-%EC%B6%94%EC%83%81%ED%99%94
+    
+  
+
