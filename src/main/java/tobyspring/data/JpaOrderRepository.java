@@ -5,10 +5,11 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.EntityTransaction;
 import jakarta.persistence.PersistenceContext;
 import tobyspring.order.Order;
+import tobyspring.order.OrderRepository;
 
 import java.math.BigDecimal;
 
-public class OrderRepository {
+public class JpaOrderRepository implements OrderRepository {
 
     //    private final EntityManagerFactory emf;
 
@@ -18,6 +19,7 @@ public class OrderRepository {
     @PersistenceContext
     private EntityManager entityManager;
 
+    @Override
     public void save(Order order) {
         entityManager.persist(order);
     }

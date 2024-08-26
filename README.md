@@ -408,10 +408,16 @@
   * ### 체크 예외의 문제점 -> 무조건 잡거나, 잡지 못하면 throw를 선언해 던져야만 함
     * ![img_2.png](src/main/resources/image4/img_2.png)
   * ### jdbcTemplate(JDBC 반복문제 해결) -> 템플릿/콜백 패턴이 쓰임 / 예외 발생 시 스프링 예외 변환기도 자동 실행해줌
+    * dbcTemplate은 SQLException을 단지 런타임 예외인 DataAccessException으로 포장하는 것이 아니라 DB의 에러 코드를 DataAccessException 계층구조의 클래스 중 하나로 매핑해준다.
+    * JdbcTemplate에서 던지는 예외는 모두 DataAccessException의 서브클래스 타입이다.
+    * SQLException을 단지 런타임 예외인 DataAccessException으로 포장하는 것이 아니라 DB의 에러코드를 DataAccessException 계층구조의 클래스중 하나로 매핑해준다.
   
   * 참고할 만한 블로그 
     * https://velog.io/@semi-cloud/Spring-DB-%EC%8A%A4%ED%94%84%EB%A7%81-%EC%98%88%EC%99%B8-%EC%B6%94%EC%83%81%ED%99%94
     * https://hsb422.tistory.com/entry/%E3%85%81%EB%AC%B8%EB%B2%95-%EC%8A%A4%ED%94%84%EB%A7%81-%EC%98%88%EC%99%B8-%EC%B6%94%EC%83%81%ED%99%94
     * https://velog.io/@baekgom/RestControllerAdvice-%EC%98%88%EC%99%B8-%EC%B2%98%EB%A6%AC-%EA%B5%AC%ED%98%84%ED%95%98%EA%B8%B0
-  
+    * https://velog.io/@semi-cloud/Spring-DB-%EC%98%88%EC%99%B8-%EA%B3%84%EC%B8%B5
+
+
+
 
