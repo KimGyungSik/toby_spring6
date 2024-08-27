@@ -2,12 +2,9 @@ package tobyspring;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.orm.jpa.JpaTransactionManager;
-import org.springframework.transaction.support.TransactionCallback;
-import org.springframework.transaction.support.TransactionTemplate;
 import tobyspring.order.Order;
 import tobyspring.order.OrderService;
+import tobyspring.order.OrderServiceImpl;
 
 import java.math.BigDecimal;
 

@@ -418,6 +418,174 @@
     * https://velog.io/@baekgom/RestControllerAdvice-%EC%98%88%EC%99%B8-%EC%B2%98%EB%A6%AC-%EA%B5%AC%ED%98%84%ED%95%98%EA%B8%B0
     * https://velog.io/@semi-cloud/Spring-DB-%EC%98%88%EC%99%B8-%EA%B3%84%EC%B8%B5
 
+-----
+
+* ## section 7. 서비스 추상화
+  * ### 서비스 ?
+    * 스프링에 대한 오해 
+      * 스프링은 @Controller, @Service, @Repository만 기계적으로 찍어내는 개발 방법 ? -> X
+      * @Controller : 사용자에게 어떻게 보여줄 것인가?
+      * @Service : 비즈니스, 도메인 로직 (애플리케이션 중 가장 핵심적인 부분)
+      * @Repository : 데이터 접근 계층 
+      * 이 세가지는 적어도 구분해서 관심사를 분리하자는 스프링의 가이드 라인 정도임
+    * 스프링 애플리케이션의 빈이 존재하는 계층 구조
+      * ![img.png](src/main/resources/image5/img.png)
+    * 서비스 추상화 != @Service
+      * 서비스는 일반적인 용어 -> 쓰이는 곳에 따라 다른 의미를 가짐
+      * 1 . 서비스(서버)는 클라이언트가 반드시 존재해야함 (클라이언트가 누구인가?를 같이 생각하면 좋음)
+        * ![img_1.png](src/main/resources/image5/img_1.png)
+      * 2 . 서버에서 동작하는 서비스들은 상태(iv)를 가지지 않음 -> why? 여러명의 클라이언트가 요청하기 때문, 멀티쓰레드로 여러개의 요청을 한꺼번에 처리
+        * ![img_2.png](src/main/resources/image5/img_2.png)
+    * 서비스의 종류
+      * 애플리케이션 서비스 (application service) -> 애플리케이션 계층에 존재, @Service를 붙임, 비즈니스 로직의 시작과 끝
+      * 도메인 서비스 (domain service) -> 도메인 모델 패턴을 이용 (비즈니스 로직 -> 도메인 오브젝트)
+      * 인프라 서비스 (infrastructure service) -> 도메인/어플리케이션 로직에 참여하지 않는, 기술을 제공하는 서비스 ex) 메일, 캐시, 트랜잭션, 메시징... -> 서비스 추상화 대상
+      * <strong> 서비스 추상화의 서비스는 @Service가 붙은 애플리케이션 서비스가 아니라 기술을 제공하는 서비스, infrastructure Layer에 존재하는 infrastructure Service임 </strong>
+      
+  * ### 애플리케이션 서비스 도입 (@Service)
+    * 애플리케이션 서비스 -> 특정 기술에 변경/특정 기술이 적용되어지는 환경에 의존하지 않게 
+      * ![img_3.png](src/main/resources/image5/img_3.png)
+      * @Service빈으로 구성
+      * Application/Service계층에 존재
+      * 애플리케이션/도메인 로직 - 도메인 오브젝트/엔티티 활용
+      * 인프라 서비스의 도움이 필요 
+      * 가장 중요한 도메인/애플리케이션/비즈니스 로직
+      * 인프라 레이어에 존재하는 기술에 가능한 의존하지 않도록 만들어야 함
+      * PaymentService - ExRateService에 적용된 DIP
+        * ![img_4.png](src/main/resources/image5/img_4.png)
+    * 구성정보 파일을 import 하는 방법
+      * @Import(DataConfig.class) -> DataConfig에 있는 빈들도 가져올 수 있음
+    
+
+  * ### 기술에 독립적인 애플리케이션 서비스
+    * OrderService
+      * 데이터 액세스 기술의 하나인 JPA에 의존
+      * JPA를 사용하는 Repository 클래스에 의존
+      * JPA Transaction Manager에 의존
+    * Order
+      * @Entity가 붙은 JPA 엔티티로 작성
+      * 컴파일 시점에만 JPA 라이브러리에 의존
+      * 클래스 코드에는 JPA 기술과 관련된 내용이 들어가지 않음
+      * JPA를 사용하지 않으면 런타임에는 JPA 라이브러리에 의존하지 않음
+    * Order에서 JPA 메타테이터 분리
+      * 애노테이션(@Entity)은 컴파일타임 라이브러리 의존성만 가진다
+      * 엔티티의 동작에는 영향을 주지 않기 때문에 엔티티 클래스를 다른 데이터 기술에서 사용해도 됨
+      * 그래도 제거하고 싶다면 외부 XML 디스크립터를 사용할 수 있음 
+      * ![img_5.png](src/main/resources/image5/img_5.png)
+        * Order클래스에 있는 JPA와 관련된 애노테이션을 제거 -> orm.xml파일에 구성정보 이동
+
+  * ### 특정 기술(JPA)에 의존하지 않는 애플리케이션 서비스 만들기
+    * 1 . JPA Repository - OrderRepository에 의존하지 않도록 변경 -> 의존관계 역전(DIP)
+      * ![img_6.png](src/main/resources/image5/img_6.png) ==========> ![img_7.png](src/main/resources/image5/img_7.png)
+      * 해결된 문제 : JPA를 사용하는 Repository 클래스에 의존
+  * ### 트랜잭션 서비스 추상화 (PlatformTransactionManager)
+    * 2 . 트랜잭션을 관리하는 오브젝트이 추상화 
+      * Transaction은 데이터 기술에 따라 방법이 다름 ex) JDBC, JPA, MyBatis, Jooq..
+      * JPA 트랜잭션 : EntityManager가 필요, EntityManager에서 트랜잭션을 얻어옴
+        * ![img_8.png](src/main/resources/image5/img_8.png)
+      * JDBC 트랜잭션 : Connection을 얻어옴, 기본적으로 AutoCommit이 가능함
+        * ![img_9.png](src/main/resources/image5/img_9.png)
+      * <strong> 추상화 : 구현의 복잡함과 디테일을 감추고 중요한 것만 남기는 기법</strong>
+        
+        * 여러 인프라 서비스 기술의 공통적이고 핵심적인 기능을 인터페이스로 정의하고 이를 구현하는 어댑터를 만들어 일관된 사용이 가능하게 만드는 것이 서비스 추상화
+        * 서비스 추상화 -> 어댑터(제공된 것과 필요한 것 아이의 차이를 메우는 패턴)를 사용
+        * 개별 트랜잭션 기술의 디테일에 의존하는 클라이언트
+          * ![img_10.png](src/main/resources/image5/img_10.png), ![img_11.png](src/main/resources/image5/img_11.png)
+        * 트랜잭션을 관리하는 오브젝트의 추상화 -> 어댑터 패턴 사용
+          * ![img_13.png](src/main/resources/image5/img_13.png)
+          * 클라이언트가 JpaTransactionManager에 의존하지 않도록 
+          * 제공되는 부분은 클라이언트가 몰라도 됨
+        * PlatformTransactionManager
+          * ![img_14.png](src/main/resources/image5/img_14.png)
+        * 즉, <strong> 구현을 여러가지 종류로 다르게 접근/ 다른 기술로 전환을 하고 싶으면 서비스 추상화 적용 </strong>
+      * 해결된 문제 : JPA Transaction Manager에 의존
 
 
+  * ### JDBC 데이터 엑세스 기술 (JPA -> JDBC(자바에서 직접 제공하는 데이터 엑세스 기술), OrderService의 수정없이 기술 변경이 잘 되는지? )
+    * JdbcClient
+      * SQL을 사용하는 JDBC데이터 처리 코드를 유연하게 작성하도록 도와줌
+      * 일종의 템플릿/콜백
+      * 스프링의 JdbcTemplate의 대체 기술
+      * JdbcClient를 이용한 테이블 생성 초기화 작업을 위해 JdbcOrderRepository의 빈 초기화 작업이 끝나면 실행될 수 있도록 -> @PostConstruct
+    * DataSourceTransactionManager
+      * JDBC의 Connection을 이용하는 트랜잭션 매니저
+      * Connection을 리턴하는 DataSource 오브젝트 필요
+    * JDBC 데이터 액세스용 구성 정보 -> DataSource, DataSourceTransactionManager
 
+  * ### 트랜잭션 프록시 
+    * OrderService에서 기술 관련 코드 제거
+      * 데이터 기술이 변경되어도 기존 코드는 영향을 받지 않음
+      * 하지만, TransactionTemplate, PlatformTransactionManager와 같은 기술과 연관된 코드가 계속 등장함
+      * 트랜잭션의 시작과 종료는 보통 애플리케이션 서비스 메서드 실행 전후에 붙음
+        * ![img_15.png](src/main/resources/image5/img_15.png)
+    * 트랜잭션 테스트
+      * 트랜잭션이 필요한 곳에 정확하게 적용되었는지 테스트 하기는 매우 어려움
+      * JDBC 처럼 자동 커밋이 되거나 Spring Data JPA처럼 기본 리포지토리 구현에서 트랜잭션을 알아서 적용해주는 기술을 사용할 떄 트랜잭션이 바르게 적용되지 않은 것을 놓치기 쉬움
+      * 모든 작업이 성공하면 하나의 트랜잭션으로 진행된 것인지 여러개의 트랜잭션으로 쪼개신 것인지 확인하기 어려움
+      * 트랜잭션 중간에 실패하는 케이스를 만들 수 있다면 롤백 여부로 확인할 수 있음
+    * JPA 트랜잭션 / JDBC 트랜잭션 -> 사용법이 다름
+      * JPA는 트랜잭션매니저를 얻어와야 하야 트랜잭션 시작이 가능함
+      * JDBC는 AutoCommit이 가능함 그래서 하나의 작업으로 안묶일때가 있음 (AutoCommit=false로 바꾸면 수동커밋 가능)
+    * 데이터를 넣고 뺼때 유용하게 쓸 수 있는 오브젝트 -> Record
+      * ![img_16.png](src/main/resources/image5/img_16.png) =====> ![img_17.png](src/main/resources/image5/img_17.png), ![img_18.png](src/main/resources/image5/img_18.png)
+    
+    * 데코레이터 패턴 (상속과 포함을 동시에)
+      * 오브젝트의 코드를 변경하지 않고 새로운 기능을 런타임에 부여하는 디자이 패턴
+      * ![img_20.png](src/main/resources/image5/img_20.png)
+    * 프록시 패턴 (대리인을 통해 타켓 접근)
+      * 타깃을 대신해서 존재하며 접근을 제거하거나 보안, 지연, 원격 접속 등의 기능을 제공
+      * 클라이언트는 인터페이스를 통해서만 대상을 알고 있게 만듬
+      * ![img_21.png](src/main/resources/image5/img_21.png)
+    * 데코레이터 패턴 -> 기능 부여 / 프록시 패턴 -> 접근제어 역할
+
+
+  * ### @Transactional과 AOP
+    * 트랜잭션 프록시
+      * OrderService 인터페이스 추출
+      * 트랜잭션 부가 기능을 제공하는 OrderServiceTxProxy 프록시
+      * ![img_22.png](src/main/resources/image5/img_22.png)
+    * 트랜잭션 프록시 적용
+      * 동일한 OrderService 인터페이스를 구현한 프록시를 OrderClient에 주입
+      * ![img_23.png](src/main/resources/image5/img_23.png)
+    * @EnableTransactionManagement
+      * Spring Container에게 Transaction proxy를 만들게끔 알려주는 애노테이션
+    * 스프링이 만들어주는 트랜잭션 프록시
+      * @Transactional 애노테이션이 붙은 클래스의 메서드가 트랜잭션 안에서 실행되도록 프록시를 만들어 줌
+    * 스프링의 프록시 AOP
+      * AOP는 스프링에서 그다지 성공하지 못한 핵심 기술 중의 하나
+      * 활용 용도가 제한적이면서 막상 사용하기는 매우 어려움
+      * 스프링이 만들어 놓은 트랜잭션과 보안 기술에서는 유용하게 활용
+      * 직접 활용하려면 꽤 많은 학습이 필요함
+      * AOP는 아니더라도 데코레이터/프록시 패턴의 동작원리를 이해하고 필요한 곳에 활용할 수 있음
+
+
+* ## section 8. 스프링으로 어떻게 개발할 것인가?
+  * ### 스프링 애플리케이션 개발 
+    * 1 . 애플리케이션 코드를 설계하고 스프링 빈(bean) 선정
+    * 2 . 구성정보 메타데이터 작성
+    * 1 + 2 => 스프링 컨테이너 준비
+
+  * ### 스프링 구성정보 메타데이터
+    * 스프링 빈의 정의(클래스,이름,생성자,프로퍼티,오토와이어링)
+    * 애노테이션 기반 구성정보 (@Component, @Autowired)
+    * 자바 기반 구성정보 (@Configuration, @Bean)
+    * 자동 구성정보(@AutoConfiguration) - SpringBoot
+
+  * ### 스프링이 제공하는 인프라 빈 활용
+    * 스프링부트의 자동 구성과 프로퍼티 설정을 통해서 활용 가능
+    * 자동 구성에 의해 내부에서 만들어지는 빈의 구조를 이해 
+    * 프로퍼티 구성 정보를 이용한 커스토마이징
+    * @Bean 오버라이딩을 이용한 구성 
+    * @Enable로 시작하는 기능
+
+  * ### 스프링의 각 모듈 기술 활용
+    * 스프링과 이에 대응되는 스프링 부트의 기능을 함께 학습 
+    * 테스트
+    * 데이터 액세스 ㏗JDBC, JPA㏘
+    * 웹MVC
+    * REST Client ㏗4가지㏘
+    * 태스크 실행, 스케줄링
+    * 캐시
+    * 리액티브
+
+  
