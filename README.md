@@ -418,6 +418,70 @@
     * https://velog.io/@baekgom/RestControllerAdvice-%EC%98%88%EC%99%B8-%EC%B2%98%EB%A6%AC-%EA%B5%AC%ED%98%84%ED%95%98%EA%B8%B0
     * https://velog.io/@semi-cloud/Spring-DB-%EC%98%88%EC%99%B8-%EA%B3%84%EC%B8%B5
 
+* ## 토비 스프링 3.1 책에 대한 요약 (4장 예외)
+  * ### 예외처리 방법 3가지
+    * 1 . 예외 복구
+    * 2 . 예외처리 회피 -> throws
+    * 3 . 예외 전환 
+      * 예외 전환의 2가지 목적
+        * 3-1 . 내부에서 발생한 예외를 그대로 던지는 것이 그 예외 상황에 대한 적절한 의미부여를 해주지 못할때 의미 있는 예외로 바꿔주기위해 (로우레벨의 예외를 좀 더 의미있고 추상화된 예외로 바꿔서)
+        * 3-2 . 체크예외 -> 언체크 예외
+    * 3-1에 대한 설명
+      * 의미가 분명한 예외를 던지면 서비스 계층에서 적절합 복구 작업이 가능
+      * 서비스 계층에서 특정 기술의 정보를 해석하는 코드를 담는건 매우 어색함
+      * ![img.png](src/main/resources/image6/img.png)
+      * DAO에서 예외처리가 아닌 예외 전환이 일어나는건 OK
+      * DuplicateKyException -> DuplicateUserIdException(e)
+    
+  * ### 예외처리 전략
+    * 복구할 수 없는 에외 -> RuntimeException으로 전환해서 던져야함
+      * why? 복구할만한 방법이 없기 때문에
+    * 하지만 비즈니스 로직 상에서 생기는 예외들은 체크예외를 사용하는 것이 적절
+      * why? 비즈니스적인 의미있는 예외는 적절한 대응이나 복구 작업이 필요하기 때문
+    * <strong> 즉, 어차피 복구 못할 예외들이면 런타임 예외로 포장해서 던지게 해야함 </strong>
+      
+      * why? 불필요한 throws선언이 들어가지 않게 하기 위해서
+      * 체크예외는 복구할 가능성이 조금이라도 존재하기 때문에 개발자에게 처리하기를 기대함
+    * DuplicateUserIdException -> 사용자 정의 예외
+      * ![img_1.png](src/main/resources/image6/img_1.png)
+      * 굳이 체크예외? NO 왜냐하면 의미있는 예외는 더 앞단의 오브젝트에서 다룰 수 있기 때문
+      * 어디서든 처리할 수 있다면 (아이디 중복 예외를 처리하고 싶을 경우)-> 언체크 예외로 전환
+      * 대신 메서드에 명시적으로 throws선언을 해줘야함 why? 의미있는 정보를 전달하기 위해, 런타임 예외도 throws 선언가능
+        * ![img_2.png](src/main/resources/image6/img_2.png)
+        * ![img_3.png](src/main/resources/image6/img_3.png)
+      * 런타임 예외를 사용한다면 문서화가 필요함 (API 문서)
+    * 런타임 예외 전략 -> 낙관적인 예외처리 기법
+      * why? 예외가 생겨도 시스템 레벨에서 처리, 필요한 경우 처리도 가능
+
+  * ### 애플리케이션 예외 (@Service)
+    * 애플리케이션 자체의 로직에 의해 의도적으로 발생시키고, 반드시 catch해서 무엇인가 조치를 취하도록 하는 예외
+    * 1 . 예외발생 -> 특별한 값 반환 (0 또는 -1) -> 호출하는 쪽 반드시 리턴값 확인 
+      * but 이 방법은 if문 범벅이 될 수도..
+    * 2 . 정상적인 코드는 그대로 두고, 비즈니스적인 의미를 띤 예외(체크예외)를 던지도록
+      * ![img_4.png](src/main/resources/image6/img_4.png)
+  
+  * ### SQLException ?
+    * 99% 코드레벨에서 복구 불가능 -> 언체크 예외로 전환해줘야함
+    * SQLException -> DataAccessException
+      * 필요한 경우에만 DataAccessException을 잡아서 처리해주면 됨, 그외의 것들은 무시
+
+  * ### JdbcTemplate
+    * 1 . SQLException을 포장해서 던짐 DataAccessException으로
+      * DataAccessException은 상세한 예외정보를 의미 있고 일관성 있는 예외로 전환해서 추상화시켜줌 (DataAccessException 계층구조의 클래스 중에서)
+      * 애플리케이션 레벨(@Service)에서 신경 쓰지 않도록
+    * 2 . DB의 에러코드를 하나로 매핑시켜줌
+      * DB종류와 상관없이 변환이 가능하다는 것!
+      * 중복키 발생 -> DataAccessException의 서브클래스인 DuplicateKeyException으로 매핑되서 던져짐
+      * ![img_5.png](src/main/resources/image6/img_5.png)
+      * 근데 만약 중복키 에러가 발생했을 떄 직접 정의한 예외를 발생 시키고 싶다?
+        * ![img_6.png](src/main/resources/image6/img_6.png)
+        
+  * ### 정리
+    * 대부분의 데이터 엑세스 예외는 애플리케이션에서는 복구 불가능 
+      * but, 중복키 에러처럼 비즈니스 로직에서 의미 있게 처리할 수 있는 예외도 존재한다는 것
+    * DataAccessException 활용 시 주의사항
+      * SQLException에 담긴 DB의 에러코드를 바로 해석하는 JDBC와 달리 JPA, Hibernate, JDO의 경우 DB의 에러코드와 달리 예외들은 세분화 되어있지않아 키 값이 중복되어 발생하는 DuplicationKeyException을 기대할 수 없음
+        * 그렇기에 DAO에서 사용하는 기술의 종류와 상관없이 동일한 예외를 기대하고 싶다면 사용자예외를 정의한 후 예외 전환을 해주어야할 필요가 있음
 -----
 
 * ## section 7. 서비스 추상화
