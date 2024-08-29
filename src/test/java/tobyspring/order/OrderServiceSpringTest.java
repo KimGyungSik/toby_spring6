@@ -85,6 +85,7 @@ public class OrderServiceSpringTest {
 
         JdbcClient client = JdbcClient.create(dataSource);
         var count = client.sql("select count(*) from orders where no='0300'").query(Long.class).single();
+        System.out.println(count);
         Assertions.assertThat(count).isEqualTo(0);
     }
 }

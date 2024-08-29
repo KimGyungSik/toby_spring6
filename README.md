@@ -477,6 +477,10 @@
         * ![img_6.png](src/main/resources/image6/img_6.png)
         
   * ### 정리
+    * ![img.png](img.png)
+    * ![img_2.png](img_2.png)
+    * <strong> 복구 가능한 오류와 복구 불가능한 오류를 구분하자!! </strong>
+    
     * 대부분의 데이터 엑세스 예외는 애플리케이션에서는 복구 불가능 
       * but, 중복키 에러처럼 비즈니스 로직에서 의미 있게 처리할 수 있는 예외도 존재한다는 것
     * DataAccessException 활용 시 주의사항
