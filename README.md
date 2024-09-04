@@ -562,6 +562,7 @@
           * ![img_10.png](src/main/resources/image5/img_10.png), ![img_11.png](src/main/resources/image5/img_11.png)
         * 트랜잭션을 관리하는 오브젝트의 추상화 -> 어댑터 패턴 사용
           * ![img_13.png](src/main/resources/image5/img_13.png)
+          * ![image](https://github.com/user-attachments/assets/4b53bd49-1d4c-4230-bb85-8498e51d96c4)
           * 클라이언트가 JpaTransactionManager에 의존하지 않도록 
           * 제공되는 부분은 클라이언트가 몰라도 됨
         * PlatformTransactionManager
@@ -599,10 +600,10 @@
       * ![img_16.png](src/main/resources/image5/img_16.png) =====> ![img_17.png](src/main/resources/image5/img_17.png), ![img_18.png](src/main/resources/image5/img_18.png)
     
     * 데코레이터 패턴 (상속과 포함을 동시에)
-      * 오브젝트의 코드를 변경하지 않고 새로운 기능을 런타임에 부여하는 디자이 패턴
+      * 오브젝트의 코드를 변경하지 않고 새로운 기능을 런타임에 부여하는 디자인 패턴
       * ![img_20.png](src/main/resources/image5/img_20.png)
     * 프록시 패턴 (대리인을 통해 타켓 접근)
-      * 타깃을 대신해서 존재하며 접근을 제거하거나 보안, 지연, 원격 접속 등의 기능을 제공
+      * 타깃을 대신해서 존재하며 접근을 제거하거나 보안, 지연, 원격 접속 등의  기능을 제공
       * 클라이언트는 인터페이스를 통해서만 대상을 알고 있게 만듬
       * ![img_21.png](src/main/resources/image5/img_21.png)
     * 데코레이터 패턴 -> 기능 부여 / 프록시 패턴 -> 접근제어 역할
